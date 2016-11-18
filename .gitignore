@@ -5,3 +5,6 @@
 *.hdf
 *.h5
 *.png
+*.html
+*.dylib
+*.ipynb_checkpoints*
