@@ -40,7 +40,7 @@ def ensure_dir(f):
 def run(FILE_NAME):
 
 
-    DATAFIELD_NAME =  'TotO3_D'
+    DATAFIELD_NAME =  'TotH2OVap_D'
     
     
     #print 'INPUT SEL',FILE_NAME,DATAFIELD_NAME
@@ -99,7 +99,7 @@ def run(FILE_NAME):
     m.drawmeridians(np.arange(-180., 181., 45.), labels=[0, 0, 0, 1])
     m.pcolormesh(longitude, latitude, data, latlon=True, alpha=0.90)
     cb = m.colorbar()
-    cb.set_label('Unit:Db')
+    cb.set_label('Unit:kg/m2')
     basename = os.path.basename(FILE_NAME)
     plt.title('{0}\n {1}'.format(basename, DATAFIELD_NAME))
     fig = plt.gcf()
