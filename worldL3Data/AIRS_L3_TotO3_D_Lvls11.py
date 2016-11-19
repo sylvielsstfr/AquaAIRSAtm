@@ -32,6 +32,11 @@ import numpy as np
 
 USE_NETCDF4 = False
 
+def ensure_dir(f):
+    d = os.path.dirname(f)
+    if not os.path.exists(f):
+        os.makedirs(f)
+
 def run(FILE_NAME):
 
 
@@ -102,12 +107,19 @@ def run(FILE_NAME):
     
     # for latex, no points inside the filename
     p = re.compile('[.]')
-    rootname=p.sub('_',basename)    
+    rootname=p.sub('_',basename) 
+    # in mage dir put the image inside the directory related to the file
+    rootimg_dir=os.path.join('images',rootname)
+    ensure_dir(rootimg_dir)
+    
     jpegfile = "{0}_{1}.jpg".format(rootname, DATAFIELD_NAME)
+    jpegfullfile=os.path.join(rootimg_dir,jpegfile)
     fig.tight_layout()
-    fig.savefig(jpegfile)
+    fig.savefig(jpegfullfile)
 
 if __name__ == "__main__":
+    
+    os.environ["HDFEOS_ZOO_DIR"] = "/Users/dagoret-campagnesylvie/MacOsX/LSST/MyWork/GitHub/NASA_AIRS_AQUA_DATA/AIRH3STM/2016/h4"
 
     # If a certain environment variable is set, look there for the input
     # file, otherwise look in the current directory.
@@ -118,9 +130,10 @@ if __name__ == "__main__":
     #hdffile = 'AIRS.2016.03.01.L3.RetStd031.v6.0.31.0.G16095175654.hdf'
     #hdffile = 'AIRS.2016.04.01.L3.RetStd030.v6.0.31.0.G16122185324.hdf'
     #hdffile = 'AIRS.2016.05.01.L3.RetStd031.v6.0.31.0.G16153184258.hdf'
+    hdffile = 'AIRS.2016.06.01.L3.RetStd030.v6.0.31.0.G16189154115.hdf'
     #hdffile = 'AIRS.2016.07.01.L3.RetStd031.v6.0.31.0.G16223152110.hdf'
     #hdffile = 'AIRS.2016.08.01.L3.RetStd031.v6.0.31.0.G16245202845.hdf'
-    hdffile = 'AIRS.2016.09.01.L3.RetStd030.v6.0.31.0.G16281134124.hdf'
+    #hdffile = 'AIRS.2016.09.01.L3.RetStd030.v6.0.31.0.G16281134124.hdf'
     try:
         hdffile = os.path.join(os.environ['HDFEOS_ZOO_DIR'], hdffile)
     except KeyError:
