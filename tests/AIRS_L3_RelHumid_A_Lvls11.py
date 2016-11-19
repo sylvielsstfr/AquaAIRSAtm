@@ -95,12 +95,14 @@ def run(FILE_NAME):
 
 if __name__ == "__main__":
 
+    #os.environ["HDFEOS_ZOO_DIR"] = "."
+    os.environ["HDFEOS_ZOO_DIR"] = "/Users/dagoret-campagnesylvie/MacOsX/LSST/MyWork/GitHub/AquaAIRSAtm/tests"
+
     # If a certain environment variable is set, look there for the input
     # file, otherwise look in the current directory.
     hdffile = 'AIRS.2002.08.01.L3.RetStd_H031.v4.0.21.0.G06104133732.hdf'
     try:
-        #hdffile = os.path.join(os.environ['HDFEOS_ZOO_DIR'], hdffile)
-        hdffile = os.path.join('.', hdffile)
+        hdffile = os.path.join(os.environ['HDFEOS_ZOO_DIR'], hdffile)
     
     except KeyError:
         pass

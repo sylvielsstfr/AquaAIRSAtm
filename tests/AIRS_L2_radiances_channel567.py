@@ -2,7 +2,7 @@
 Copyright (C) 2014 The HDF Group
 Copyright (C) 2014 John Evans
 
-This example code illustrates how to access and visualize a GESDISC AIRS grid
+This example code illustrates how to access and visualize a GESDISC AIRS swath
 in Python.
 
 If you have any questions, suggestions, or comments on this example, please use
@@ -14,7 +14,7 @@ contact us at eoshelp@hdfgroup.org or post it at the HDF-EOS Forum
 
 Usage:  save this script and run
 
-    python AIRS_L3_Temperature_MW_A_Lvls11.py
+    python AIRS_L2_radiances_channel567.py
 
 The HDF file must either be in your current working directory or in a directory
 specified by the environment variable HDFEOS_ZOO_DIR.
@@ -28,83 +28,74 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+
 import numpy as np
 
 USE_NETCDF4 = False
 
 def run(FILE_NAME):
 
+    # Identify the HDF-EOS2 swath data file.
+    DATAFIELD_NAME = 'radiances'
 
-    print 'FILE_NAME = ',FILE_NAME
-
-    DATAFIELD_NAME = 'Temperature_MW_A'
-    #DATAFIELD_NAME =  'TotO3_D'
     if USE_NETCDF4:
         from netCDF4 import Dataset    
         nc = Dataset(FILE_NAME)
-
-        # The variable has a fill value, 
-        # so netCDF4 converts it to a float64 masked array for us.
-        data = nc.variables[DATAFIELD_NAME][11,:,:]
+        data = nc.variables['radiances'][:,:,567]
         latitude = nc.variables['Latitude'][:]
         longitude = nc.variables['Longitude'][:]
-
     else:
         from pyhdf.SD import SD, SDC
         hdf = SD(FILE_NAME, SDC.READ)
 
-        # List available SDS datasets.
-        print hdf.datasets()
-
         # Read dataset.
         data3D = hdf.select(DATAFIELD_NAME)
-        data = data3D[11,:,:]
+        data = data3D[:,:,567]
 
         # Read geolocation dataset.
         lat = hdf.select('Latitude')
         latitude = lat[:,:]
         lon = hdf.select('Longitude')
         longitude = lon[:,:]
-
-        # Handle fill value.
-        attrs = data3D.attributes(full=1)
-        fillvalue=attrs["_FillValue"]
-
-        # fillvalue[0] is the attribute value.
-        fv = fillvalue[0]
-        data[data == fv] = np.nan
-        data = np.ma.masked_array(data, np.isnan(data))
+        
 
     
-    # Draw an equidistant cylindrical projection using the low resolution
-    # coastline database.
-    m = Basemap(projection='cyl', resolution='l',
-                llcrnrlat=-90, urcrnrlat = 90,
-                llcrnrlon=-180, urcrnrlon = 180)
+    # Replace the filled value with NaN, replace with a masked array.
+    data[data == -9999] = np.nan
+    datam = np.ma.masked_array(data, np.isnan(data))
+    
+ 
+    # Draw a polar stereographic projection using the low resolution coastline
+    # database.
+    m = Basemap(projection='spstere', resolution='l',
+                boundinglat=-65, lon_0 = 180)
     m.drawcoastlines(linewidth=0.5)
-    m.drawparallels(np.arange(-90., 120., 30.), labels=[1, 0, 0, 0])
-    m.drawmeridians(np.arange(-180., 181., 45.), labels=[0, 0, 0, 1])
-    m.pcolormesh(longitude, latitude, data, latlon=True, alpha=0.90)
+    m.drawparallels(np.arange(-80., -50., 5.))
+    m.drawmeridians(np.arange(-180., 181., 20.), labels=[1, 0, 0, 1])
+    x, y = m(longitude, latitude)
+    m.pcolormesh(x, y, datam)
+
+   # See page 101 of "AIRS Version 5.0 Released Files Description" document [1]
+    # for unit specification.
+    units = 'mW/m**2/cm**-1/sr'
     cb = m.colorbar()
-    cb.set_label('Unit:K')
+    cb.set_label('Unit:'+units)
+    
     basename = os.path.basename(FILE_NAME)
-    plt.title('{0}\n {1} at TempPrsLvls=11'.format(basename, DATAFIELD_NAME))
+    plt.title('{0}\n {1} at channel=567'.format(basename, DATAFIELD_NAME))
     fig = plt.gcf()
     # plt.show()
-    pngfile = "{0}.{1}.py.png".format(basename, DATAFIELD_NAME)
+    pngfile = "{0}.py.png".format(basename)
     fig.savefig(pngfile)
 
 if __name__ == "__main__":
 
     os.environ["HDFEOS_ZOO_DIR"] = "/Users/dagoret-campagnesylvie/MacOsX/LSST/MyWork/GitHub/AquaAIRSAtm/tests"
-    
     # If a certain environment variable is set, look there for the input
     # file, otherwise look in the current directory.
-    
-    hdffile = 'AIRS.2002.08.01.L3.RetStd_H031.v4.0.21.0.G06104133732.hdf'
+    hdffile = 'AIRS.2002.12.31.001.L2.CC_H.v4.0.21.0.G06100185050.hdf'
     try:
         hdffile = os.path.join(os.environ['HDFEOS_ZOO_DIR'], hdffile)
-        print hdffile
     except KeyError:
         pass
 
