@@ -20,6 +20,25 @@ import numpy as np
 
 from pyhdf.SD import SD, SDC
 
+ #LSST site
+Longitude_lsst = -70.7366833333333 # deg
+Latitude_lsst = -30.240741666666672 #deg
+Altitude_lsst = 2749.999999999238 #m
+ #CTIO Site
+Longitude_ctio = -70.815 # deg
+Latitude_ctio = -30.165277777777778 #deg
+Altitude_ctio = 2214.9999999993697 #m
+# Cerro Paranal
+ 
+Longitude_paranal = -70.40300000000002 #deg
+Latitude_paranal  = -24.625199999999996 #deg
+Altitude_paranal = 2635.0000000009704 #m
+# Observatoire de Haute Provence
+Longitude_ohp=5.71222222222
+Latitude_ohp=43.9316666667
+Altitude_ohp=650.    
+    
+
 #--------------------------------------------------------------------------
 def ensure_dir(f):
     '''
@@ -30,6 +49,30 @@ def ensure_dir(f):
         os.makedirs(f)
 #-----------------------------------------------------------------------------    
 
+def loc_ctio():
+    return(Longitude_ctio,Latitude_ctio,Altitude_ctio)
+    
+def loc_lsst():
+    return(Longitude_lsst,Latitude_lsst,Altitude_lsst)
+    
+def loc_ohp():
+    return(Longitude_lsst,Latitude_lsst,Altitude_lsst)
+    
+def loc_none():
+    return(0,0,0)
+    
+    
+def observatory_location(obs):
+    if obs== 'ctio':
+        loc=loc_ctio()
+    elif obs=='lsst':
+        loc=loc_lsst()
+    elif obs=='ohp':
+        loc=loc_ohp()
+    else:
+        loc=loc_none()
+    return loc
+                                                                                                                 
 
 #---------------------------------------------------------------------------------
 def GetData(file,datafield):
